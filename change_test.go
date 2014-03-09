@@ -23,8 +23,12 @@ func TestDetectChange(t *testing.T) {
 		},
 	}
 
+	var detector = Detector{
+		MinSampleSize: 5,
+	}
+
 	for _, tt := range tests {
-		r := DetectChange(tt.w, 5, Conf95)
+		r := detector.Check(tt.w)
 		if r.Difference == 0 && tt.idx == 0 {
 			// no difference found and no difference expected -- good
 		} else if r.Difference != 0 && r.Index == tt.idx {

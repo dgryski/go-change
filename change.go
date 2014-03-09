@@ -32,10 +32,16 @@ type ChangePoint struct {
 	After      Stats
 }
 
-// TODO(dgryski): move some of the params to a struct so we just have detector.Check(window)
+const DefaultMinSampleSize = 30
+const DefaultConfidence = Conf95
+
+type Detector struct {
+	MinSampleSize int
+	TConf         Confidence
+}
 
 // DetectChange returns the index of a potential change point
-func DetectChange(window []float64, minSampleSize int, tConf Confidence) *ChangePoint {
+func (d *Detector) Check(window []float64) *ChangePoint {
 
 	n := len(window)
 
@@ -72,6 +78,12 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 
 	var before, after Stats
 
+	// sane default
+	minSampleSize := d.MinSampleSize
+	if minSampleSize == 0 {
+		minSampleSize = DefaultMinSampleSize
+	}
+
 	for l := minSampleSize; l < (n - minSampleSize + 1); l++ {
 		n1 := float64(l + 1)
 		mean1 := cumsum[l] / n1
@@ -97,9 +109,14 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 
 	var diff float64
 
+	tconf := d.TConf
+	if tconf == ConfDefault {
+		tconf = DefaultConfidence
+	}
+
 	if before.N > 0 {
 		// we found a difference
-		diff = ttest(before, after, tConf)
+		diff = ttest(before, after, tconf)
 	}
 
 	cp := &ChangePoint{
@@ -118,6 +135,9 @@ func ttest(rs, ds Stats, confidx Confidence) float64 {
 	i := ds.N + rs.N - 2
 
 	var t float64
+
+	// We use 0 to represent default, a valid value will be 1 too high
+	confidx -= 1
 
 	if i > nstudent {
 		t = student[0][confidx]
@@ -147,7 +167,8 @@ func ttest(rs, ds Stats, confidx Confidence) float64 {
 type Confidence int
 
 const (
-	Conf80 Confidence = iota
+	ConfDefault Confidence = iota
+	Conf80
 	Conf90
 	Conf95
 	Conf98
