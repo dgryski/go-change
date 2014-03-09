@@ -45,15 +45,15 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 
 	// cumsum contains the cumulative sum of all elements <= i
 	// cumsumsq contains the cumulative sum of squares of all elements <= i
-	cumsum := make([]float64, 0, n)
-	cumsumsq := make([]float64, 0, n)
+	cumsum := make([]float64, n)
+	cumsumsq := make([]float64, n)
 
 	var sum, sumsq float64
-	for _, v := range window {
+	for i, v := range window {
 		sum += v
 		sumsq += v * v
-		cumsum = append(cumsum, sum)
-		cumsumsq = append(cumsumsq, sumsq)
+		cumsum[i] = sum
+		cumsumsq[i] = sumsq
 	}
 
 	// sb is our between-class scatter, the degree of dissimilarity of the
