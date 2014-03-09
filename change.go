@@ -113,7 +113,7 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 }
 
 // From https://github.com/codahale/ministat/blob/master/src/ministat.c
-func ttest(ds, rs Stats, confidx Confidence) float64 {
+func ttest(rs, ds Stats, confidx Confidence) float64 {
 
 	i := ds.N + rs.N - 2
 
