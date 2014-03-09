@@ -26,10 +26,10 @@ type Stats struct {
 }
 
 type ChangePoint struct {
-	Index   int
-	TResult TResult
-	Before  Stats
-	After   Stats
+	Index      int
+	Difference float64
+	Before     Stats
+	After      Stats
 }
 
 // TODO(dgryski): move some of the params to a struct so we just have detector.Check(window)
@@ -95,27 +95,25 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 		}
 	}
 
+	var diff float64
+
+	if before.N > 0 {
+		// we found a difference
+		diff = ttest(before, after, tConf)
+	}
+
 	cp := &ChangePoint{
-		Index:   maxsbIdx,
-		TResult: ttest(before, after, tConf),
-		Before:  before,
-		After:   after,
+		Index:      maxsbIdx,
+		Difference: diff,
+		Before:     before,
+		After:      after,
 	}
 
 	return cp
 }
 
-// TResult is the result of a Student's t-test.
-type TResult struct {
-	// The absolute difference in sample means
-	Difference float64
-
-	// The percentage difference in sample means
-	Percent float64
-}
-
 // From https://github.com/codahale/ministat/blob/master/src/ministat.c
-func ttest(ds, rs Stats, confidx Confidence) TResult {
+func ttest(ds, rs Stats, confidx Confidence) float64 {
 
 	i := ds.N + rs.N - 2
 
@@ -139,13 +137,10 @@ func ttest(ds, rs Stats, confidx Confidence) TResult {
 
 	if math.Abs(d) <= e {
 		// no difference
-		return TResult{}
+		return 0
 	}
 
-	return TResult{
-		Difference: d,
-		Percent:    d * 100 / rs.Mean,
-	}
+	return d
 }
 
 // Confidence is a confidence level for the Student's t-test
