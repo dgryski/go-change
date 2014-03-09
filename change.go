@@ -72,7 +72,7 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 
 	var before, after Stats
 
-	for l := minSampleSize; l < (n - 1 - minSampleSize); l++ {
+	for l := minSampleSize; l < (n - minSampleSize + 1); l++ {
 		n1 := float64(l + 1)
 		mean1 := cumsum[l] / n1
 
