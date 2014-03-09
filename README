@@ -1,0 +1,3 @@
+go-change: An online change detection algorithm.
+
+For package documentation, please see http://godoc.org/github.com/dgryski/go-change
