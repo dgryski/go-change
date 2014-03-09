@@ -63,7 +63,7 @@ func DetectChange(window []float64, minSampleSize int, tConf Confidence) *Change
 	var maxsbIdx int
 
 	// The paper also provides a metric sw, for 'within-class scatter',
-	// which depends on the standard-deviation of the samples. The suggests
+	// which depends on the standard-deviation of the samples. It suggests
 	// finding the point that minimizes the ratio sw/sb.  However, it then
 	// proves that this is equivalent to maximizing sb.  The calculation of
 	// sb depends only on the means of the two samples, and not of the
