@@ -24,6 +24,7 @@ func TestDetectChange(t *testing.T) {
 	}
 
 	var detector = Detector{
+		TConf:         Conf95,
 		MinSampleSize: 5,
 	}
 
