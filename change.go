@@ -130,7 +130,7 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 
 	if before.n > 0 {
 		// we found a difference
-		diff = onlinestats.TTest(before, after, onlinestats.Confidence(d.TConf))
+		diff = onlinestats.Welch(before, after, onlinestats.Confidence(d.TConf))
 	}
 
 	cp := &ChangePoint{
