@@ -118,8 +118,8 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 
 			// The variances are calculated only if needed to
 			// reduce the math in the main loop
-			var1 := (cumsumsq[l] - (cumsum[l]*cumsum[l])/(n1-1)) / (n1 - 1)
-			var2 := ((sumsq - cumsumsq[l]) - (sum2*sum2)/(n2-1)) / (n2 - 1)
+			var1 := (cumsumsq[l] - (cumsum[l]*cumsum[l])/(n1)) / (n1 - 1)
+			var2 := ((sumsq - cumsumsq[l]) - (sum2*sum2)/(n2)) / (n2 - 1)
 
 			before.mean, before.variance, before.n = mean1, var1, l+1
 			after.mean, after.variance, after.n = mean2, var2, n-l-1
