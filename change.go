@@ -143,6 +143,49 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 	return cp
 }
 
+// Stream monitors a stream of floats for changes
+type Stream struct {
+	windowSize int
+	blockSize  int
+
+	data []float64
+
+	buffer []float64
+	bufidx int
+
+	detector *Detector
+}
+
+// NewStream constructs a new stream detector
+func NewStream(windowSize int, minSample int, blockSize int, tConf onlinestats.Confidence) *Stream {
+	return &Stream{
+		windowSize: windowSize,
+		blockSize:  blockSize,
+		data:       make([]float64, windowSize),
+		buffer:     make([]float64, blockSize),
+		detector: &Detector{
+			MinSampleSize: minSample,
+			TConf:         tConf,
+		},
+	}
+}
+
+// Push adds a float to the stream and calls the change detector
+func (s *Stream) Push(item float64) *ChangePoint {
+	s.buffer[s.bufidx] = item
+	s.bufidx++
+
+	if s.bufidx < s.blockSize {
+		return nil
+	}
+
+	copy(s.data[0:], s.data[s.blockSize:])
+	copy(s.data[s.windowSize-s.blockSize:], s.buffer)
+	s.bufidx = 0
+
+	return s.detector.Check(s.data)
+}
+
 // Confidence levels for the Student's t-test
 const (
 	Conf80   = onlinestats.Conf80
