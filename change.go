@@ -150,6 +150,8 @@ type Stream struct {
 
 	data []float64
 
+	items int
+
 	buffer []float64
 	bufidx int
 
@@ -174,6 +176,7 @@ func NewStream(windowSize int, minSample int, blockSize int, tConf onlinestats.C
 func (s *Stream) Push(item float64) *ChangePoint {
 	s.buffer[s.bufidx] = item
 	s.bufidx++
+	s.items++
 
 	if s.bufidx < s.blockSize {
 		return nil
@@ -182,6 +185,10 @@ func (s *Stream) Push(item float64) *ChangePoint {
 	copy(s.data[0:], s.data[s.blockSize:])
 	copy(s.data[s.windowSize-s.blockSize:], s.buffer)
 	s.bufidx = 0
+
+	if s.items < s.windowSize {
+		return nil
+	}
 
 	return s.detector.Check(s.data)
 }
