@@ -117,7 +117,7 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 			maxsbIdx = l
 
 			// The variances are calculated only if needed to
-			// reduce the main in the main loop
+			// reduce the math in the main loop
 			var1 := (cumsumsq[l] - (cumsum[l]*cumsum[l])/(n1-1)) / (n1 - 1)
 			var2 := ((sumsq - cumsumsq[l]) - (sum2*sum2)/(n2-1)) / (n2 - 1)
 
