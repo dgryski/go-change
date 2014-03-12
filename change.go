@@ -210,3 +210,5 @@ func (s *Stream) Push(item float64) *ChangePoint {
 	return s.detector.Check(s.data)
 }
 
+// Window returns the current data window.  This should be treated as read-only
+func (s *Stream) Window() []float64 { return s.data }
