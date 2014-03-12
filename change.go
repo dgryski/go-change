@@ -80,6 +80,7 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 
 	// cumsum contains the cumulative sum of all elements <= i
 	// cumsumsq contains the cumulative sum of squares of all elements <= i
+	// TODO(dgryski): move this to a move numerically stable algorithm
 	cumsum := make([]float64, n)
 	cumsumsq := make([]float64, n)
 
