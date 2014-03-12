@@ -17,7 +17,11 @@ the two distributions to reduce the rate of false positives.
 */
 package change
 
-import "github.com/dgryski/go-onlinestats"
+import (
+	"math"
+
+	"github.com/dgryski/go-onlinestats"
+)
 
 // Stats are some descriptive statistics for a block of items.  It implements the interface needed by the t-test method of onlinestats.
 type Stats struct {
@@ -34,6 +38,9 @@ func (s Stats) Var() float64 { return s.variance }
 
 // Len returns the number of items in the data set
 func (s Stats) Len() int { return s.n }
+
+// Stddev returns the standard deviation of the sample
+func (s Stats) Stddev() float64 { return math.Sqrt(s.variance) }
 
 // ChangePoint is a potential change point found by Check().
 type ChangePoint struct {
