@@ -144,7 +144,7 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 	}
 
 	// not above our threshold
-	if conf < d.MinConfidence {
+	if conf <= d.MinConfidence {
 		return nil
 	}
 

@@ -29,7 +29,7 @@ func TestDetectChange(t *testing.T) {
 
 	for _, tt := range tests {
 		r := detector.Check(tt.w)
-		if r.Confidence < 0.95 && tt.idx == 0 {
+		if (r == nil || r.Confidence < 0.95) && tt.idx == 0 {
 			// no difference found and no difference expected -- good
 		} else if r.Confidence >= 0.95 && r.Index == tt.idx {
 			// difference found at expected location -- good
