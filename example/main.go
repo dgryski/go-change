@@ -41,7 +41,7 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 
-	s := change.NewStream(*windowSize, *minSample, *blockSize, change.Conf99p5)
+	s := change.NewStream(*windowSize, *minSample, *blockSize, 0.995)
 
 	type graphPoints [2]float64
 	var graphData []graphPoints

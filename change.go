@@ -50,6 +50,9 @@ type ChangePoint struct {
 	// Difference is the difference in distribution means found by the Student's t-test
 	Difference float64
 
+	// Confidence is the confidence returned by a Student's t-test
+	Confidence float64
+
 	// Before is the statistics of the distribution before the change point
 	Before Stats
 
@@ -60,10 +63,10 @@ type ChangePoint struct {
 // DefaultMinSampleSize is the minimum sample size to consider from the window being checked
 const DefaultMinSampleSize = 30
 
-// Detector is a change detector.  The default confidence level is passing a t-test with 80% confidence.
+// Detector is a change detector.
 type Detector struct {
 	MinSampleSize int
-	TConf         onlinestats.Confidence
+	MinConfidence float64
 }
 
 // Check returns the index of a potential change point
@@ -133,16 +136,21 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 		}
 	}
 
-	var diff float64
-
+	var conf float64
 	if before.n > 0 {
 		// we found a difference
-		diff = onlinestats.Welch(before, after, onlinestats.Confidence(d.TConf))
+		conf = onlinestats.Welch(before, after)
+	}
+
+	// not above our threshold
+	if conf < d.MinConfidence {
+		return nil
 	}
 
 	cp := &ChangePoint{
 		Index:      maxsbIdx,
-		Difference: diff,
+		Difference: after.Mean() - before.Mean(),
+		Confidence: conf,
 		Before:     before,
 		After:      after,
 	}
@@ -166,15 +174,16 @@ type Stream struct {
 }
 
 // NewStream constructs a new stream detector
-func NewStream(windowSize int, minSample int, blockSize int, tConf onlinestats.Confidence) *Stream {
+func NewStream(windowSize int, minSample int, blockSize int, confidence float64) *Stream {
 	return &Stream{
 		windowSize: windowSize,
 		blockSize:  blockSize,
 		data:       make([]float64, windowSize),
 		buffer:     make([]float64, blockSize),
+
 		detector: &Detector{
 			MinSampleSize: minSample,
-			TConf:         tConf,
+			MinConfidence: confidence,
 		},
 	}
 }
@@ -200,12 +209,3 @@ func (s *Stream) Push(item float64) *ChangePoint {
 	return s.detector.Check(s.data)
 }
 
-// Confidence levels for the Student's t-test
-const (
-	Conf80   = onlinestats.Conf80
-	Conf90   = onlinestats.Conf90
-	Conf95   = onlinestats.Conf95
-	Conf98   = onlinestats.Conf98
-	Conf99   = onlinestats.Conf99
-	Conf99p5 = onlinestats.Conf99p5
-)

@@ -24,18 +24,17 @@ func TestDetectChange(t *testing.T) {
 	}
 
 	var detector = Detector{
-		TConf:         Conf95,
 		MinSampleSize: 5,
 	}
 
 	for _, tt := range tests {
 		r := detector.Check(tt.w)
-		if r.Difference == 0 && tt.idx == 0 {
+		if r.Confidence < 0.95 && tt.idx == 0 {
 			// no difference found and no difference expected -- good
-		} else if r.Difference != 0 && r.Index == tt.idx {
+		} else if r.Confidence >= 0.95 && r.Index == tt.idx {
 			// difference found at expected location -- good
 		} else {
-			t.Errorf("DetectChange index=%d, wanted %d", r.Index, tt.idx)
+			t.Errorf("DetectChange confidence=%f index=%d, wanted %d", r.Confidence, r.Index, tt.idx)
 		}
 	}
 }
