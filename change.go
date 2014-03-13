@@ -115,11 +115,12 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 	}
 
 	for l := minSampleSize; l < (n - minSampleSize + 1); l++ {
-		n1 := float64(l + 1)
-		mean1 := cumsum[l] / n1
+		lidx := l - 1
+		n1 := float64(l)
+		mean1 := cumsum[lidx] / n1
 
-		n2 := float64(n - l - 1)
-		sum2 := (sum - cumsum[l])
+		n2 := float64(n - l)
+		sum2 := (sum - cumsum[lidx])
 		mean2 := sum2 / n2
 
 		sb := ((n1 * n2) / (n1 + n2)) * (mean1 - mean2) * (mean1 - mean2)
@@ -129,11 +130,11 @@ func (d *Detector) Check(window []float64) *ChangePoint {
 
 			// The variances are calculated only if needed to
 			// reduce the math in the main loop
-			var1 := (cumsumsq[l] - (cumsum[l]*cumsum[l])/(n1)) / (n1 - 1)
-			var2 := ((sumsq - cumsumsq[l]) - (sum2*sum2)/(n2)) / (n2 - 1)
+			var1 := (cumsumsq[lidx] - (cumsum[lidx]*cumsum[lidx])/(n1)) / (n1 - 1)
+			var2 := ((sumsq - cumsumsq[lidx]) - (sum2*sum2)/(n2)) / (n2 - 1)
 
-			before.mean, before.variance, before.n = mean1, var1, l+1
-			after.mean, after.variance, after.n = mean2, var2, n-l-1
+			before.mean, before.variance, before.n = mean1, var1, l
+			after.mean, after.variance, after.n = mean2, var2, n-l
 		}
 	}
 
