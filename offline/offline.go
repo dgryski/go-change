@@ -127,7 +127,7 @@ func linearMeanFilter(series []float64, width int) []float64 {
 func createMarkedSeries(n, pos, width int) []float64 {
 	if pos > n-1 || pos < 0 {
 		// should never happen
-		panic("Marker position out of boundaries")
+		panic("marker position out of boundaries")
 	}
 
 	d := make([]float64, n)
