@@ -98,30 +98,35 @@ func linearMeanFilter(series []float64, width int) []float64 {
 		return series
 	}
 
+	support := int(math.Floor(float64(width) / 2.0)) // that many points around the kernel
+
 	n := len(series)
-	support := int(math.Ceil(float64(width)/2.0)) - 1 // that many points around the kernel
+	n2 := n + support*2
 
-	s := make([]float64, n)
+	// symmetrically extended series
+	// needed to obtain the full window for the first few entries
+	ext := make([]float64, n2)
 
-	// head
+	// left extension
 	for i := 0; i < support; i++ {
-		s[i] = series[i]
-	}
-
-	// tail
-	for i := n - support; i < n; i++ {
-		s[i] = series[i]
+		ext[i] = series[i]
 	}
 
 	// body
-	for kernel := support; kernel < n-support; kernel++ {
-		window := series[kernel-support : kernel+support+1]
-		mean, _ := stats(window)
+	copy(ext[support:], series)
 
-		s[kernel] = mean
+	// right extension
+	for i := n2 - support; i < n2; i++ {
+		ext[i] = series[i-support*2]
 	}
 
-	return s
+	for i := 0; i < n; i++ {
+		mean, _ := stats(ext[i : i+support*2+1])
+
+		series[i] = mean
+	}
+
+	return series
 }
 
 func createMarkedSeries(n, pos, width int) []float64 {
