@@ -10,7 +10,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dgryski/go-change/offline"
+	"github.com/ksurent/go-change/offline"
 )
 
 func main() {
