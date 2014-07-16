@@ -82,6 +82,10 @@ func stats(series []float64) (float64, float64) {
 func differences(series []float64) []float64 {
 	n := len(series)
 
+	if n == 1 {
+		return series
+	}
+
 	d := make([]float64, n)
 	d[0] = series[1] - series[0]
 
