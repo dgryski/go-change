@@ -83,7 +83,7 @@ func differences(series []float64) []float64 {
 	n := len(series)
 
 	d := make([]float64, n)
-	d[0] = series[0]
+	d[0] = series[1] - series[0]
 
 	for i := 1; i < n; i++ {
 		d[i] = series[i] - series[i-1]
