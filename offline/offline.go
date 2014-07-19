@@ -27,7 +27,7 @@ func (d *Detector) Check(series []float64) ([]ChangePoint, error) {
 		return nil, errors.New("marker width cannot be larger than the series size")
 	}
 
-	series = differences(linearMeanFilter(series, width))
+	series = linearMeanFilter(differences(series), width)
 
 	resChan := make(chan ChangePoint)
 
