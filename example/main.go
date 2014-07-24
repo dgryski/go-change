@@ -7,12 +7,11 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"math"
 	"os"
 	"sort"
 	"strconv"
 
-	"github.com/dgryski/go-change"
+	"github.com/ksurent/go-change"
 )
 
 func main() {
@@ -22,6 +21,8 @@ func main() {
 	compressPoints := flag.Int("cp", 10, "compress points for graph display")
 	fname := flag.String("f", "", "file name")
 	ymin := flag.Int("ymin", 0, "minimum y value for graph")
+	corr := flag.Float64("c", 0.8, "minimum correlation coefficient")
+	width := flag.Int("mw", 10, "marker width")
 
 	flag.Parse()
 
@@ -41,7 +42,10 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 
-	s := change.NewStream(*windowSize, *minSample, *blockSize, 0.995)
+	s, err := change.NewStream(*windowSize, *minSample, *blockSize, *width, *corr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	type graphPoints [2]float64
 	var graphData []graphPoints
@@ -71,11 +75,8 @@ func main() {
 		r := s.Push(item)
 
 		if r != nil {
-			diff := math.Abs(r.Difference / r.Before.Mean())
-			if r.Difference != 0 && diff > 0.06 {
-				log.Printf("difference found at offset=%d: %f %v\n", items-*windowSize+r.Index, diff, r)
-				changePoints = append(changePoints, items-*windowSize+r.Index)
-			}
+			log.Printf("difference found at offset=%d: %f\n", items-*windowSize+r.Index, r.Correlation)
+			changePoints = append(changePoints, items-*windowSize+r.Index)
 		}
 	}
 
