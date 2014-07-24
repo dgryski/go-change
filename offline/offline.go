@@ -63,7 +63,12 @@ func correlate(series1, series2 []float64) float64 {
 	}
 	cov /= float64(n)
 
-	return cov / (sd1 * sd2)
+	sd := sd1 * sd2
+	if sd == 0 {
+		return sd
+	}
+
+	return cov / sd
 }
 
 func stats(series []float64) (float64, float64) {
