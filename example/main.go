@@ -79,6 +79,10 @@ func main() {
 		}
 	}
 
+	if err := scanner.Err(); err != nil {
+		fmt.Printf("Error during scan: %v", err)
+	}
+
 	reportTmpl.Execute(os.Stdout, struct {
 		YMin         int
 		GraphData    []graphPoints
