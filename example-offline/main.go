@@ -8,21 +8,16 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 
-	"github.com/ksurent/go-change"
+	"github.com/ksurent/go-change/offline"
 )
 
 func main() {
-	windowSize := flag.Int("w", 120, "window size")
-	minSample := flag.Int("ms", 30, "min sample size")
-	blockSize := flag.Int("bs", 10, "block size")
-	compressPoints := flag.Int("cp", 10, "compress points for graph display")
+	minCorrelation := flag.Float64("c", 0.6, "correlation threshold")
+	markerWidth := flag.Int("w", 1, "marker width")
 	fname := flag.String("f", "", "file name")
 	ymin := flag.Int("ymin", 0, "minimum y value for graph")
-	corr := flag.Float64("c", 0.8, "minimum correlation coefficient")
-	width := flag.Int("mw", 10, "marker width")
 
 	flag.Parse()
 
@@ -42,51 +37,39 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 
-	s, err := change.NewStream(*windowSize, *minSample, *blockSize, *width, *corr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	type graphPoints [2]float64
-	var graphData []graphPoints
-	var last []float64
-
-	var changePoints []int
-
-	var items int
+	var series []float64
+	var graphData [][]float64
+	var cnt int
 
 	for scanner.Scan() {
-		item, err := strconv.ParseFloat(scanner.Text(), 64)
+		value, err := strconv.ParseFloat(scanner.Text(), 64)
 		if err != nil {
 			fmt.Printf("error parsing <%s>: %s\n", scanner.Text(), err)
 			continue
 		}
 
-		last = append(last, item)
-		items++
-		if items > 0 && items%*compressPoints == 0 {
-			sort.Float64s(last)
-			median := last[*compressPoints/2]
-			last = last[:0]
+		series = append(series, value)
+		graphData = append(graphData, []float64{float64(cnt), value})
 
-			graphData = append(graphData, [2]float64{float64(items), median})
-		}
-
-		r := s.Push(item)
-
-		if r != nil {
-			log.Printf("difference found at offset=%d: %f\n", items-*windowSize+r.Index, r.Correlation)
-			changePoints = append(changePoints, items-*windowSize+r.Index)
-		}
+		cnt += 1
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Printf("Error during scan: %v", err)
+	detector := offline.Detector{*markerWidth, *minCorrelation}
+	changes, err := detector.Check(series)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var changePoints []int
+	for _, change := range changes {
+		changePoints = append(changePoints, change.Index)
+
+		log.Printf("Found change at pos=%d with corr=%.4f", change.Index, change.Correlation)
 	}
 
 	reportTmpl.Execute(os.Stdout, struct {
 		YMin         int
-		GraphData    []graphPoints
+		GraphData    [][]float64
 		ChangePoints []int
 	}{
 		*ymin,
