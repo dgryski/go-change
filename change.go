@@ -1,6 +1,6 @@
 // Package change implements an online change detection algorithm
 /*
-http://excelsior.cs.ucsb.edu/papers/as06.pdf
+https://sites.cs.ucsb.edu/~yfwang/papers/as06.pdf
 
 How effective is this algorithm?  The authors state
 "[T]he estimation algorithm can be shown theoretically to give the correct
